@@ -1,0 +1,30 @@
+<div class="container">
+  <h2>Lista de Materiales</h2>
+  <a routerLink="/materiales/nuevo" class="btn btn-primary">➕ Nuevo Material</a>
+
+  <table class="table table-striped mt-3">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Tipo</th>
+        <th>Precio</th>
+        <th>Fecha Compra</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let material of materiales">
+        <td>{{ material.nombre }}</td>
+        <td>{{ material.descripcion }}</td>
+        <td>{{ material.tipo }}</td>
+        <td>{{ material.precio | currency }}</td>
+        <td>{{ material.fechaCompra | date }}</td>
+        <td>
+          <a [routerLink]="['/materiales/editar', material.id]" class="btn btn-warning btn-sm">Editar</a>
+          <button (click)="deleteMaterial(material.id!)" class="btn btn-danger btn-sm">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

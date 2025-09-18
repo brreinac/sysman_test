@@ -1,0 +1,35 @@
+<div class="container">
+  <h2>{{ isEdit ? 'Editar Material' : 'Nuevo Material' }}</h2>
+
+  <form (ngSubmit)="onSubmit()" #form="ngForm">
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" class="form-control" [(ngModel)]="material.nombre" name="nombre" required>
+    </div>
+
+    <div class="form-group">
+      <label>Descripción</label>
+      <input type="text" class="form-control" [(ngModel)]="material.descripcion" name="descripcion" required>
+    </div>
+
+    <div class="form-group">
+      <label>Tipo</label>
+      <input type="text" class="form-control" [(ngModel)]="material.tipo" name="tipo" required>
+    </div>
+
+    <div class="form-group">
+      <label>Precio</label>
+      <input type="number" class="form-control" [(ngModel)]="material.precio" name="precio" required>
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de Compra</label>
+      <input type="date" class="form-control" [(ngModel)]="material.fechaCompra" name="fechaCompra" required>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">
+      {{ isEdit ? 'Actualizar' : 'Guardar' }}
+    </button>
+    <a routerLink="/materiales" class="btn btn-secondary mt-3">Cancelar</a>
+  </form>
+</div>
