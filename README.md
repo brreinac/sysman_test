@@ -199,3 +199,14 @@ JavaDoc en métodos de servicio.
  Pruebas unitarias con JUnit & Mockito
 
  CI/CD (GitHub Actions)
+
+ Autenticación JWT
+
+Login: POST /api/auth/login con JSON:
+
+{ "username": "admin", "password": "admin123" }
+
+
+Retorna un token JWT que debe enviarse en el header:
+
+Authorization: Bearer <token>

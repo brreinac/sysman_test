@@ -21,42 +21,105 @@ import java.util.List;
 @Service
 public class MaterialServiceImpl implements MaterialService {
 
-    private final MaterialRepository materialRepository;
+    @Autowired
+    private MaterialRepository materialRepository;
 
-    public MaterialServiceImpl(MaterialRepository materialRepository) {
-        this.materialRepository = materialRepository;
+    @Autowired
+    private CiudadRepository ciudadRepository;
+
+    @Override
+    public List<MaterialDTO> getAll() {
+        return materialRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Material> getAll() {
-        return materialRepository.findAll();
+    public List<MaterialDTO> findByTipo(String tipo) {
+        return materialRepository.findByTipo(tipo)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Material getById(Long id) {
-        return materialRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado con id " + id));
+    public List<MaterialDTO> findByFechaCompra(String fechaCompra) {
+        LocalDate date = LocalDate.parse(fechaCompra);
+        return materialRepository.findByFechaCompra(date)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Material create(Material material) {
-        return materialRepository.save(material);
+    public List<MaterialDTO> findByCiudad(Long ciudadId) {
+        Ciudad ciudad = ciudadRepository.findById(ciudadId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ciudad no encontrada"));
+        return materialRepository.findByCiudad(ciudad)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Material update(Long id, Material material) {
-        Material existing = getById(id);
-        existing.setNombre(material.getNombre());
-        existing.setDescripcion(material.getDescripcion());
-        existing.setTipo(material.getTipo());
-        existing.setPrecio(material.getPrecio());
-        existing.setFechaCompra(material.getFechaCompra());
-        return materialRepository.save(existing);
+    public MaterialDTO create(MaterialDTO dto) {
+        validateFechas(dto);
+        Ciudad ciudad = ciudadRepository.findById(dto.getCiudadId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ciudad no encontrada"));
+
+        Material material = new Material();
+        material.setNombre(dto.getNombre());
+        material.setDescripcion(dto.getDescripcion());
+        material.setTipo(dto.getTipo());
+        material.setPrecio(dto.getPrecio());
+        material.setFechaCompra(dto.getFechaCompra());
+        material.setFechaVenta(dto.getFechaVenta());
+        material.setEstado(dto.getEstado());
+        material.setCiudad(ciudad);
+
+        return mapToDto(materialRepository.save(material));
     }
 
     @Override
-    public void delete(Long id) {
-        Material material = getById(id);
-        materialRepository.delete(material);
+    public MaterialDTO update(Long id, MaterialDTO dto) {
+        validateFechas(dto);
+
+        Material material = materialRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado"));
+
+        Ciudad ciudad = ciudadRepository.findById(dto.getCiudadId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ciudad no encontrada"));
+
+        material.setNombre(dto.getNombre());
+        material.setDescripcion(dto.getDescripcion());
+        material.setTipo(dto.getTipo());
+        material.setPrecio(dto.getPrecio());
+        material.setFechaCompra(dto.getFechaCompra());
+        material.setFechaVenta(dto.getFechaVenta());
+        material.setEstado(dto.getEstado());
+        material.setCiudad(ciudad);
+
+        return mapToDto(materialRepository.save(material));
+    }
+
+    private void validateFechas(MaterialDTO dto) {
+        if (dto.getFechaVenta() != null && dto.getFechaCompra().isAfter(dto.getFechaVenta())) {
+            throw new IllegalArgumentException("La fecha de compra no puede ser posterior a la fecha de venta.");
+        }
+    }
+
+    private MaterialDTO mapToDto(Material material) {
+        MaterialDTO dto = new MaterialDTO();
+        dto.setId(material.getId());
+        dto.setNombre(material.getNombre());
+        dto.setDescripcion(material.getDescripcion());
+        dto.setTipo(material.getTipo());
+        dto.setPrecio(material.getPrecio());
+        dto.setFechaCompra(material.getFechaCompra());
+        dto.setFechaVenta(material.getFechaVenta());
+        dto.setEstado(material.getEstado());
+        dto.setCiudadId(material.getCiudad().getId());
+        return dto;
     }
 }

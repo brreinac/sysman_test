@@ -32,61 +32,45 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping("/api/materials")
+@RequestMapping("/api/materiales")
 public class MaterialController {
 
-    private final MaterialService materialService;
+    @Autowired
+    private MaterialService materialService;
 
-    public MaterialController(MaterialService materialService) {
-        this.materialService = materialService;
-    }
-
-    private ResponseEntity<Map<String,Object>> wrap(int status, String message, Object data){
-        return ResponseEntity.status(status).body(Map.of(
-            "status", status,
-            "message", message,
-            "data", data
-        ));
-    }
-
+    // 🔓 Público: obtener todos los materiales
     @GetMapping
-    public ResponseEntity<?> getAll(){
-        List<MaterialResponse> list = materialService.getAll();
-        if(list.isEmpty()) return wrap(404, "No materials found", List.of());
-        return wrap(200, "Ok", list);
+    public ResponseEntity<List<MaterialDTO>> getAll() {
+        return ResponseEntity.ok(materialService.getAll());
     }
 
-    @GetMapping("/search/byTipo")
-    public ResponseEntity<?> byTipo(@RequestParam String tipo){
-        List<MaterialResponse> list = materialService.findByTipo(tipo);
-        if(list.isEmpty()) return wrap(404, "No materials for tipo="+tipo, List.of());
-        return wrap(200, "Ok", list);
+    // 🔓 Público: buscar por tipo
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<List<MaterialDTO>> findByTipo(@PathVariable String tipo) {
+        return ResponseEntity.ok(materialService.findByTipo(tipo));
     }
 
-    @GetMapping("/search/byFechaCompra")
-    public ResponseEntity<?> byFecha(@RequestParam String fecha){
-        LocalDate d = LocalDate.parse(fecha);
-        List<MaterialResponse> list = materialService.findByFechaCompra(d);
-        if(list.isEmpty()) return wrap(404, "No materials for fechaCompra="+fecha, List.of());
-        return wrap(200, "Ok", list);
+    // 🔓 Público: buscar por fechaCompra
+    @GetMapping("/fecha/{fechaCompra}")
+    public ResponseEntity<List<MaterialDTO>> findByFechaCompra(@PathVariable String fechaCompra) {
+        return ResponseEntity.ok(materialService.findByFechaCompra(fechaCompra));
     }
 
-    @GetMapping("/search/byCiudad")
-    public ResponseEntity<?> byCiudad(@RequestParam String ciudadCodigo){
-        List<MaterialResponse> list = materialService.findByCiudad(ciudadCodigo);
-        if(list.isEmpty()) return wrap(404, "No materials for ciudad="+ciudadCodigo, List.of());
-        return wrap(200, "Ok", list);
+    // 🔓 Público: buscar por ciudad
+    @GetMapping("/ciudad/{ciudadId}")
+    public ResponseEntity<List<MaterialDTO>> findByCiudad(@PathVariable Long ciudadId) {
+        return ResponseEntity.ok(materialService.findByCiudad(ciudadId));
     }
 
+    // 🔐 Protegido con JWT: crear
     @PostMapping
-    public ResponseEntity<?> create(@Validated @RequestBody MaterialRequest req){
-        MaterialResponse res = materialService.create(req);
-        return wrap(200, "Created", res);
+    public ResponseEntity<MaterialDTO> create(@RequestBody MaterialDTO dto) {
+        return ResponseEntity.ok(materialService.create(dto));
     }
 
+    // 🔐 Protegido con JWT: actualizar
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @Validated @RequestBody MaterialRequest req){
-        MaterialResponse res = materialService.update(id, req);
-        return wrap(200, "Updated", res);
+    public ResponseEntity<MaterialDTO> update(@PathVariable Long id, @RequestBody MaterialDTO dto) {
+        return ResponseEntity.ok(materialService.update(id, dto));
     }
 }
